@@ -1,0 +1,29 @@
+{
+  "name": "api.example",
+  "version": "1.0.0",
+  "description": "Api example",
+  "main": "index.mjs",
+  "scripts": {
+    "start": "nodemon -r @std/esm index.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mons54/api.example.git"
+  },
+  "author": "Julien Simonet <j.mons54@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mons54/api.example/issues"
+  },
+  "homepage": "https://github.com/mons54/api.example#readme",
+  "dependencies": {
+    "@std/esm": "^0.26.0",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.8.1"
+  }
+}
