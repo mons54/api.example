@@ -39,6 +39,8 @@ app.use(cors({
 
 app.use(bodyParser.json())
 
+app.use(express.static('docs'))
+
 function verifyToken (req, res, next) {
   let token = req.headers.authorization
   if (typeof token === 'string' &&
@@ -61,10 +63,40 @@ function verifyToken (req, res, next) {
   }
 }
 
-app.get('/me', verifyToken, (req, res) => {
-  res.send('Prend moi !')
+/**
+ * @api {get} /me Afficher l'utilisateur connecté
+ * @apiHeader Authorization Basic Access Authentication token
+ * @apiName GetMe
+ * @apiGroup Users
+ * @apiSampleRequest me
+ */
+app.get('/me', verifyToken, async (req, res) => {
+  const token = req.headers.authorization.substring(7)
+  const decoded = jwt.verify(token, process.env.SECRET)
+  res.json({
+    id: decoded.id,
+    email: decoded.email,
+    name: decoded.name
+  })
 })
 
+/**
+ * @api {post} /user Créer un utilisateur
+ * @apiName PostUser
+ * @apiGroup Users
+ * @apiHeader Content-Type=application/json application/json
+ * @apiExample Example usage:
+ *     body:
+ *     {
+ *       "email": "user@email.com",
+ *       "name": "User name",
+ *       "password": "szjkdjklkjdz"
+ *     }
+ * @apiParam (body/json) {String} email User email
+ * @apiParam (body/json) {String} name User name
+ * @apiParam (body/json) {String} password User password
+ * @apiSampleRequest user
+ */
 app.post('/user', async (req, res) => {
   const email = req.body.email
   const password = req.body.password
@@ -90,6 +122,21 @@ app.post('/user', async (req, res) => {
   }
 })
 
+/**
+ * @api {post} /login Se connecter
+ * @apiName PostLogin
+ * @apiGroup Users
+ * @apiHeader Content-Type=application/json application/json
+ * @apiExample Example usage:
+ *     body:
+ *     {
+ *       "email": "user@email.com",
+ *       "password": "szjkdjklkjdz"
+ *     }
+ * @apiParam (body/json) {String} email User email
+ * @apiParam (body/json) {String} password User password
+ * @apiSampleRequest login
+ */
 app.post('/login', async (req, res) => {
   const email = req.body.email
   const password = req.body.password
@@ -112,9 +159,11 @@ app.post('/login', async (req, res) => {
     })
 
   } else {
-
+    res.status(401)
+    res.json({
+      error: "Identifiant invalid"
+    })
   }
-  console.log(data)
 })
 
 
