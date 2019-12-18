@@ -97,7 +97,7 @@ app.get('/me', verifyToken, async (req, res) => {
  * @apiParam (body/json) {String} password User password
  * @apiSampleRequest user
  */
-app.post('/user', async (req, res) => {
+app.post('/register', async (req, res) => {
   const email = req.body.email
   const password = req.body.password
   const name = req.body.name
@@ -111,15 +111,32 @@ app.post('/user', async (req, res) => {
   })
 
   try {
-    const data = (await newUser.save()).toObject()
-    delete data.password
-    res.json(data)
+    const data = await newUser.save()
   } catch (e) {
-    res.status(401)
-    res.json({
-      error: e.errmsg
-    })
+    if (e.code === 11000) {
+      res.status(409)
+      return res.json({
+        error: "Email exist"
+      })
+    } else {
+      res.status(500)
+      return res.json({
+        error: e.errmsg
+      })
+    }
   }
+
+  const token = jwt.sign({
+    id: data._id,
+    name: data.name,
+    email: data.email,
+  }, process.env.SECRET, {
+    expiresIn: 86400 // 60 * 60 * 24
+  })
+
+  res.json({
+    token
+  })
 })
 
 /**
@@ -145,7 +162,7 @@ app.post('/login', async (req, res) => {
     email
   })
 
-  if (bcryptjs.compareSync(password, data.password)) {
+  if (data && bcryptjs.compareSync(password, data.password)) {
     const token = jwt.sign({
       id: data._id,
       name: data.name,
